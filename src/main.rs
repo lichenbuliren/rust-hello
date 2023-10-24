@@ -1,24 +1,16 @@
-use std::str::FromStr;
-use std::env;
+use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use serde::Deserialize;
 
-fn main() {
-    let mut numbers = Vec::new();
-
-    for arg in env::args().skip(1) {
-        numbers.push(u64::from_str(&arg).expect("error parsing argument"));
-    }
-
-    if numbers.len() == 0 {
-        eprintln!("Usage: gcd NUMBER ...");
-        std::process::exit(1);
-    }
-
-    let mut d = numbers[0];
-    for m in &numbers[1..] {
-        d = gcd(d, *m);
-    }
-
-    println!("The greatest common divisor of {:?} is {}", numbers, d);
+#[get("/gcd")]
+async fn hello() -> HttpResponse {
+    HttpResponse::Ok().content_type("text/html").body(r#"
+        <title>GCD Calculator</title>
+        <form action="/gcd" method="post">
+            <input type="text" name="n" />
+            <input type="text" name="m" />
+            <button type="submit">Compute GCD</button>
+        </form>
+    "#)
 }
 
 // 计算两个整数的最大公约数
@@ -36,9 +28,36 @@ fn gcd(mut n: u64, mut m: u64) -> u64 {
     n
 }
 
-// Rust 自带单元测试
-#[test]
-fn test_gcd() {
-    assert_eq!(gcd(14, 15), 1);
-    assert_eq!(gcd(2 * 3 * 5 * 11 * 17, 3 * 7 * 11 * 13 * 19), 3 * 11)
+#[derive(Deserialize)]
+struct GcdParameters {
+    n:u64,
+    m:u64,
+}
+
+#[post("/gcd")]
+async fn post_gcd(form: web::Form<GcdParameters>) -> HttpResponse {
+    if form.n == 0 || form.m == 0 {
+        return HttpResponse::BadRequest().content_type("text/html").body("Computing the GCD with zero is boing.");
+    }
+
+    let response = format!("The greatest common divisor of the numbers {} and {} is <b>{}</b>\n", form.n, form.m, gcd(form.n, form.m));
+
+    HttpResponse::Ok().content_type("text/html").body(response)
+}
+
+async fn manual_hello() -> impl Responder {
+    HttpResponse::Ok().body("Hey there!")
+}
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    HttpServer::new(|| {
+        App::new()
+            .service(hello)
+            .service(post_gcd)
+            .route("/hey", web::get().to(manual_hello))
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
 }
