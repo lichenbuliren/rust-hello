@@ -1,3 +1,5 @@
+mod parse_pair;
+
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use serde::Deserialize;
 
