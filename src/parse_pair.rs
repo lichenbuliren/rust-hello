@@ -18,9 +18,50 @@ fn parse_pair<T: FromStr>(s: &str, separator: char) -> Option<(T, T)> {
     }
 }
 
+fn sieve() {
+    let mut arr = [true; 3];
+    eprintln!("before sieve arr: {:?}", arr);
+    for i in 1..3 {
+        if arr[i] {
+            let mut j = i * i;
+            eprintln!("i {}, j {}", i, j);
+            while j < 3 {
+                arr[j] = false;
+                j += i;
+            }
+        }
+    }
+    eprintln!("sieve [true; 3] result: {:?}", arr);
+}
+
+#[test]
+fn test_sieve() {
+    sieve();
+}
+
+
+
 #[test]
 fn test_parse_pair() {
     assert_eq!(parse_pair::<i32>("", ','), None);
     assert_eq!(parse_pair::<i32>("10, ", ','), None);
     assert_eq!(parse_pair::<i32>("10, 20", ','), Some((10, 20)));
+}
+
+
+struct Anime {
+    name: &'static str,
+    bechdel_pass: bool
+}
+
+#[test]
+fn test_anime() {
+    let aria = Anime {
+        name: "do",
+        bechdel_pass: true
+    };
+
+    let anime_ref = &aria;
+    assert_eq!(anime_ref.name, "do");
+    assert_eq!(anime_ref.bechdel_pass, true);
 }
