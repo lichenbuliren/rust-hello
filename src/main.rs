@@ -1,7 +1,24 @@
 mod parse_pair;
+pub mod car;
 
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use serde::Deserialize;
+
+// 导入多个模块
+use std::collections::{HashMap, HashSet};
+// 同时导入 std::fs & std::fs::File
+use std::fs::{self, File};
+// 导入所有模块
+use std::io::prelude::*;
+// 使用别名
+use std::io::Result as IOResult;
+
+#[test]
+fn test_car() {
+    use car::engine;
+    println!("car.engine working");
+    engine::work();
+}
 
 #[get("/gcd")]
 async fn hello() -> HttpResponse {
